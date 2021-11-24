@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="server">http://192.168.0.102:8080</string>
+    <string name="register">/auth/device/login</string>
+    <string name="login">/auth/device/login</string>
+    <string name="hello">/device/active</string>
+    <string name="disconnect">/device/disconnect</string>
+    <string name="get_tasks">/device/tasks</string>
+</resources>
