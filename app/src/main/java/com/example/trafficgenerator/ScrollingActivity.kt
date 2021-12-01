@@ -105,17 +105,17 @@ class ScrollingActivity : AppCompatActivity() {
                             asyncNetworkScope.launch {
                                 Thread.sleep(1500)
                                 appendStringToLog("login as $username with pw $password and uuid $uuid")
-//                                val response = serverApi.login(username, password, uuid)
-//                                if (response.component1() is LoginResponseDTO) {
-//                                    onSuccessfulLogin()
-//                                    getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
-//                                        this.putString("username", username)
-//                                        this.putString("password", password)
-//                                        this.putString("ipAddress", ipAddress)
-//                                        this.putString("token", response.component1()!!.token)
-//                                        commit()
-//                                    }
-//                                }
+                                val response = serverApi.login(username, password, uuid)
+                                if (response.component1() is LoginResponseDTO) {
+                                    onSuccessfulLogin()
+                                    getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
+                                        this.putString("username", username)
+                                        this.putString("password", password)
+                                        this.putString("ipAddress", ipAddress)
+                                        this.putString("token", response.component1()!!.token)
+                                        commit()
+                                    }
+                                }
                             }
 
                         } else {
@@ -127,19 +127,19 @@ class ScrollingActivity : AppCompatActivity() {
                             asyncNetworkScope.launch {
                                 Thread.sleep(4000)
                                 appendStringToLog("register as $username with pw $password name $deviceName")
-//                                val response = serverApi.register(username, password, deviceName)
-//                                if (response.component1() is LoginResponseDTO) {
-//                                    onSuccessfulLogin()
-//                                    getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
-//                                        this.putString("username", username)
-//                                        this.putString("password", password)
-//                                        this.putString("deviceName", deviceName)
-//                                        this.putString("ipAddress", ipAddress)
-//                                        this.putString("uuid", response.component1()!!.uuid)
-//                                        this.putString("token", response.component1()!!.token)
-//                                        commit()
-//                                    }
-//                                }
+                                val response = serverApi.register(username, password, deviceName)
+                                if (response.component1() is LoginResponseDTO) {
+                                    onSuccessfulLogin()
+                                    getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
+                                        this.putString("username", username)
+                                        this.putString("password", password)
+                                        this.putString("deviceName", deviceName)
+                                        this.putString("ipAddress", ipAddress)
+                                        this.putString("uuid", response.component1()!!.uuid)
+                                        this.putString("token", response.component1()!!.token)
+                                        commit()
+                                    }
+                                }
                             }
                         }
 
