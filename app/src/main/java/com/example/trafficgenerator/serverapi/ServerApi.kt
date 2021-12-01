@@ -14,11 +14,11 @@ import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 
-class ServerApi(private val context: Context) {
+class ServerApi(private val context: Context, ipAddress: String) {
     private val logTag: String = context.getString(R.string.server_api_tag)
 
     init {
-        FuelManager.instance.basePath = context.getString(R.string.server)
+        FuelManager.instance.basePath = ipAddress
     }
 
     private fun Request.addJsonBodyHeader(): Request =

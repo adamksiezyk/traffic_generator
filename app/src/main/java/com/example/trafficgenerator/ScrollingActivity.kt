@@ -71,7 +71,6 @@ class ScrollingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         asyncTaskExecutor = AsyncTaskExecutor(Executors.newSingleThreadExecutor())
-        serverApi = ServerApi(applicationContext)
 
         binding = ActivityScrollingBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -93,13 +92,13 @@ class ScrollingActivity : AppCompatActivity() {
                     if (data != null) {
                         val username = (data.extras?.get("username") as SpannableString).toString()
                         val password = (data.extras?.get("password") as SpannableString).toString()
-                        //val data.extras?.get("ipAddress") as String
+                        val ipAddress = (data.extras?.get("ipAddress") as SpannableString).toString()
+                        serverApi = ServerApi(applicationContext, ipAddress)
 
                         if (data.extras?.get("login") as Boolean) {
                             //If the requested operation is login
 
                             val uuid = data.extras?.get("uuid") as String
-                            val ipAddress = (data.extras?.get("ipAddress") as SpannableString).toString()
                             appendStringToLog("Login form data:")
                             appendStringToLog("\nUsername:\t$username\nPassword:\t$password")
 
@@ -122,7 +121,6 @@ class ScrollingActivity : AppCompatActivity() {
                         } else {
                             //Requested operation is register
                             val deviceName = (data.extras?.get("deviceName") as SpannableString).toString()
-                            val ipAddress = (data.extras?.get("ipAddress") as SpannableString).toString()
                             appendStringToLog("Register form data:")
                             appendStringToLog("\nUsername:\t$username\nPassword:\t$password\nName:\t$deviceName")
 
