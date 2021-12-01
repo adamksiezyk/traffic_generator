@@ -3,6 +3,7 @@ package com.example.trafficgenerator.scripts
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executor
@@ -53,14 +54,68 @@ class AsyncTaskExecutor(private val executor: Executor) {
         )
     }
 
+    private fun parseFileURL(fileURL: String): List<String> {
+
+        /*
+        * fileUrl format: `ftp://<HOST>/<PATH>/<TO>/<FILE>.<FILE_EXTENSION>`
+        *
+        * Output: a String array containing (<HOST>, <PATH>/<TO>/FILE>, <FILE>.<FILE_EXTENSION>)
+        * */
+
+        val host        : String
+        val remoteDir   : String
+        val remoteFile  : String
+
+        // Get rid of `ftp://` suffix and split the remaining elements separated by single slashes to a mutable string
+        val temporaryList: MutableList<String> = fileURL.split("//")[1].split("/") as MutableList<String>
+
+        host = temporaryList.removeFirst()
+
+        remoteFile = temporaryList.removeLast()
+
+        remoteDir = temporaryList.joinToString("/", prefix = "/", postfix = "/")
+
+        return listOf(host, remoteDir, remoteFile)
+    }
+
     private fun ftpTaskHandler(task: GetTasksResponseDTO): GetTasksResponseDTO {
         val startDate = timingDateFormat.format(Date())
-        // insert your implementation here
-        return task.copy(
-            status = "fail",
-            orderStart = startDate,
-            orderEnd = timingDateFormat.format(Date())
-        )
+
+        // --- FTP --- //
+
+        try {
+            // Expecting fileURL to be of format - ftp://<HOST>/<PATH>/<TO>/<FILE>.<FILE_EXTENSION>
+            val parsedFileURL: List<String> = parseFileURL(task.fileUrl)
+
+            val host      = parsedFileURL[0]
+            val remoteDir = parsedFileURL[1]
+            val fileName  = parsedFileURL[2]
+
+            val ftp = FtpClient(host = host, remoteCwd = remoteDir)
+            ftp.establishConnection()
+
+            val applicationDirPath =
+                "/data/data/com.example.trafficgenerator/" // App's data directory
+
+            // Download the `fileName` file from remote and upload it back
+            ftp.download(fileName, File("${applicationDirPath}${fileName}"))
+            ftp.upload(File("${applicationDirPath}${fileName}"))
+
+            // Finished successfully - set status to `pass`
+            return task.copy(
+                status = "pass",
+                orderStart = startDate,
+                orderEnd = timingDateFormat.format(Date())
+            )
+
+        } catch (e: Exception) {
+            // If anything failed - set status to `fail`
+            return task.copy(
+                status = "fail",
+                orderStart = startDate,
+                orderEnd = timingDateFormat.format(Date())
+            )
+        }
     }
 
     private fun httpTaskHandler(task: GetTasksResponseDTO): GetTasksResponseDTO {
