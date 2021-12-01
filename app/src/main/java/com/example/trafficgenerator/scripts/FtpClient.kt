@@ -1,36 +1,35 @@
 package com.example.trafficgenerator.scripts
 
-import android.util.Log
 import it.sauronsoftware.ftp4j.FTPClient
+import android.util.Log
 import java.io.File
 
 var DEBUG = true
 
 const val Logger: String = "FtpClient"
 class FtpClient(
-    private val host: String = "10.0.2.2",
-    private val port: Int = 21,
-    private val userName: String = "fate",
-    private val password: String = "fate"
+    private val host     : String = "10.0.2.2",
+    private val port     : Int    = 21,
+    private val userName : String = "fate",
+    private val password : String = "fate",
+    private val remoteCwd: String = "/home/fate/Downloads/"
 ) {
 /*
 *   This class is an Adapter to the sauronsoftware's FtpClient Implementation made to suit our needs.
 *   For it to work - you need a server with a static IP (host) and WORKING FTP service.
 *
 *   To configure the client just parse the:
-*       - `host`    : String
-*       - `port`    : Int
-*       - `userName`: String
-*       - `password`: String
+*       - `host`     : String
+*       - `port`     : Int
+*       - `userName` : String
+*       - `password` : String
+*       - `remoteCwd`: String
 *   arguments in the constructor.
-*
-*   You also can set the remote's starting directory with `remoteCwd`: String variable.
 *
 *   All logging can be seen with logcat @ info level when using 'FtpClient` as filter.
 * */
 
     private val mFtpClient = FTPClient()
-    private val remoteCwd = "/home/fate/Downloads/"
 
     fun establishConnection() {
     /*
