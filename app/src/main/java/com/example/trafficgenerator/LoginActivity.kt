@@ -3,11 +3,9 @@ package com.example.trafficgenerator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
-
-import android.widget.EditText
-import android.content.SharedPreferences
 import android.graphics.Color
+import android.os.Bundle
+import android.widget.EditText
 import com.example.trafficgenerator.databinding.ActivityLoginBinding
 
 
@@ -27,6 +25,11 @@ class LoginActivity : Activity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        usernameEdit = findViewById(R.id.editTextUsername)
+        passwordEdit = findViewById(R.id.editTextPassword)
+        deviceNameEdit = findViewById(R.id.editTextTextPersonName)
+        ipAddressEdit = findViewById(R.id.editTextIpAddress)
+
         // Get UUID from shared preferences if it exists
         val sharedPreferences = getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE)
         val uuid = sharedPreferences.getString("uuid", null)
@@ -36,6 +39,12 @@ class LoginActivity : Activity() {
             binding.uuidErrTextView.setText("UUID: $uuid")
             binding.uuidErrTextView.setTextColor(Color.rgb(0, 128, 0))
             dataIntent.putExtra("login", true)
+
+            usernameEdit.setText(sharedPreferences.getString("username", ""))
+            passwordEdit.setText(sharedPreferences.getString("password", ""))
+            deviceNameEdit.setText(sharedPreferences.getString("deviceName", ""))
+            deviceNameEdit.isEnabled = false
+            ipAddressEdit.setText(sharedPreferences.getString("ipAddress", ""))
 
             binding.loginButton.setOnClickListener {
                 dataIntent.putExtra("username", usernameEdit.text.trim())
@@ -69,14 +78,9 @@ class LoginActivity : Activity() {
                 }
             }
         }
-
-        usernameEdit = findViewById(R.id.editTextUsername)
-        passwordEdit = findViewById(R.id.editTextPassword)
-        deviceNameEdit = findViewById(R.id.editTextTextPersonName)
-        ipAddressEdit = findViewById(R.id.editTextIpAddress)
     }
 
-    private fun checkLoginValidity() : Int {
+    private fun checkLoginValidity(): Int {
         val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
         val validityPassword = passwordEdit.text.isNotEmpty()
         val validityDeviceName = deviceNameEdit.text.isNotEmpty()
@@ -89,7 +93,7 @@ class LoginActivity : Activity() {
         return if (validityUsername and validityPassword and validityDeviceName and validityIpAddress) RESULT_OK else RESULT_CANCELED
     }
 
-    private fun checkRegisterValidity() : Int {
+    private fun checkRegisterValidity(): Int {
         val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
         val validityPassword = passwordEdit.text.isNotEmpty()
         val validityIpAddress = true //ipAddressEdit.text.trim().matches(ipRegex) - uncomment if ip will be used
