@@ -2,73 +2,101 @@ package com.example.trafficgenerator.scripts
 
 import android.util.Log
 import it.sauronsoftware.ftp4j.FTPClient
-import com.example.trafficgenerator.dto.GetTasksResponseDTO
 import java.io.File
 
 var DEBUG = true
 
 const val Logger: String = "FtpClient"
 class FtpClient(
-    private val host: String, private val userName: String, private val password: String, private val port: Int = 22
+    private val host: String = "10.0.2.2",
+    private val port: Int = 21,
+    private val userName: String = "fate",
+    private val password: String = "fate"
 ) {
+/*
+*   This class is an Adapter to the sauronsoftware's FtpClient Implementation made to suit our needs.
+*   For it to work - you need a server with a static IP (host) and WORKING FTP service.
+*
+*   To configure the client just parse the:
+*       - `host`    : String
+*       - `port`    : Int
+*       - `userName`: String
+*       - `password`: String
+*   arguments in the constructor.
+*
+*   You also can set the remote's starting directory with `remoteCwd`: String variable.
+*
+*   All logging can be seen with logcat @ info level when using 'FtpClient` as filter.
+* */
 
     private val mFtpClient = FTPClient()
-    private var remoteCwd = "/home/fate/Downloads/"
-    private var connectionEstablished = false
+    private val remoteCwd = "/home/fate/Downloads/"
 
-    var loggedIn = false
-
-    fun establishConnection(){
+    fun establishConnection() {
+    /*
+    * This function tries to:
+    *   - Establish a connection with a given host on desired port and use credentials to log-in.
+    *   - Change the transfer type to binary and the current remote dir to the specified one.
+    * */
         try {
-            Log.e(Logger, "Trying to connect...")
+            log("Trying to connect to $host:$port...")
             mFtpClient.connect(host, port)
-            connectionEstablished = true
-            Log.e(Logger, "Trying to log in...")
+            log("Successfully connected!")
+            log("Trying to log-in with $userName user...")
             mFtpClient.login(userName, password)
-            loggedIn = true
-            Log.e(Logger, "Changing client type to bin...")
+            log("Successfully logged in!")
             mFtpClient.type = FTPClient.TYPE_BINARY
-            mFtpClient.isPassive = false
-            Log.e(Logger, "Changing remote directory...")
+            log("Changed current remote directory to: $remoteCwd")
             mFtpClient.changeDirectory(remoteCwd)
-            Log.e(Logger, "Changed remote dir to: $remoteCwd")
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun upload(file: File) {
+        /*
+        * This function:
+        *   - Uploads files from the device to the remote location
+        *   - Measures time the transfer takes
+        * */
         val start = System.currentTimeMillis()
-        log("Uploading...", nextLine = false)
+        log("Uploading\t$file\tto\t$remoteCwd\t...")
         mFtpClient.upload(file)
         log("Done\t[${(System.currentTimeMillis() - start) / 1000.0}s]")
-        log("Uploaded\t$file\tto  \t$remoteCwd${file.name}")
+        log("Uploaded\t$remoteCwd${file.name} successfully.")
     }
 
     fun download(remoteFileName: String, file: File) {
+        /*
+        * This function:
+        *   - Downloads files from the remote location to the device
+        *   - Measures time the transfer takes
+        * */
         val start = System.currentTimeMillis()
-        log("Downloading...", nextLine = false)
+        log("Downloading\t$remoteCwd$remoteFileName\tto\t$file\t...")
         mFtpClient.download(remoteFileName, file)
         log("Done\t[${(System.currentTimeMillis() - start) / 1000.0}s]")
-        log("Downloaded\t$file\tfrom\t$remoteCwd$remoteFileName")
+        log("Downloaded\t$file successfully.")
     }
 }
 
-fun log(message: String, nextLine: Boolean = true) {
+fun log(message: String){
+    /*
+    * Centralized logging configuration manager
+    * */
     if (DEBUG) {
-        if (nextLine)
-            println(message)
-        else
-            print(message)
+        Log.i(Logger, message)
     }
 }
 
-fun main() {
-//    TODO: GetTasksResponseDTO integration
+fun main(){
+    // ---- EXAMPLE USAGE ---- //
 
-    val ftp = FtpClient("10.0.2.2","fate", "fate")
-    val fileName = "install_server-6a9a542f"
-    val appDataPath = "/data/data/com.example.ftp5g/"
-    ftp.upload(File("${appDataPath}code_cache/$fileName"))
-    ftp.download(fileName, File("${appDataPath}${fileName}"))
+    val ftp = FtpClient()
+    ftp.establishConnection()
+
+    val fileName = "color.zip"
+    val applicationDirPath = "/data/data/com.example.trafficgenerator/"
+    ftp.download(fileName, File("${applicationDirPath}${fileName}"))
+    ftp.upload(File("${applicationDirPath}${fileName}"))
 }
