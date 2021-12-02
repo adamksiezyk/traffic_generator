@@ -83,7 +83,7 @@ class LoginActivity : Activity() {
     private fun checkLoginValidity(): Int {
         val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
         val validityPassword = passwordEdit.text.isNotEmpty()
-        val validityIpAddress = true //ipAddressEdit.text.trim().matches(ipRegex) - uncomment if ip will be used
+        val validityIpAddress = ipAddressEdit.text.trim().matches(ipRegex)
 
         if (!validityUsername) usernameEdit.error = "Unsupported characters!"
         if (!validityPassword) passwordEdit.error = "Password cannot be empty!"
@@ -95,8 +95,8 @@ class LoginActivity : Activity() {
     private fun checkRegisterValidity(): Int {
         val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
         val validityPassword = passwordEdit.text.isNotEmpty()
-        val validityIpAddress = true //ipAddressEdit.text.trim().matches(ipRegex) - uncomment if ip will be used
         val validityDeviceName = deviceNameEdit.text.isNotEmpty()
+        val validityIpAddress = ipAddressEdit.text.trim().matches(ipRegex)
 
         if (!validityUsername) usernameEdit.error = "Unsupported characters!"
         if (!validityPassword) passwordEdit.error = "Password cannot be empty!"
