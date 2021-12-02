@@ -144,7 +144,7 @@ class ScrollingActivity : AppCompatActivity() {
                         }
 
                         //TODO: Remove fake tasks
-                        newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
+                        newTaskReceived(GetTasksResponseDTO(0L, "ftp", "none", "ftp://10.0.2.2/home/fate/Downloads/color.zip", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
                         newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
                         newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
                         newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
