@@ -120,12 +120,27 @@ class AsyncTaskExecutor(private val executor: Executor) {
 
     private fun httpTaskHandler(task: GetTasksResponseDTO): GetTasksResponseDTO {
         val startDate = timingDateFormat.format(Date())
-        // insert your implementation here
-        return task.copy(
-            status = "fail",
-            orderStart = startDate,
-            orderEnd = timingDateFormat.format(Date())
-        )
+        // --- HTTP --- //
+        try {
+            var http = httprequest(task.fileUrl)
+
+            http.httpRequest()
+
+            // Finished successfully - set status to `pass`
+            return task.copy(
+                status = "pass",
+                orderStart = startDate,
+                orderEnd = timingDateFormat.format(Date())
+            )
+
+        } catch (e: Exception) {
+            // If anything failed - set status to `fail`
+            return task.copy(
+                status = "fail",
+                orderStart = startDate,
+                orderEnd = timingDateFormat.format(Date())
+            )
+        }
     }
 
     private fun streamingTaskHandler(task: GetTasksResponseDTO): GetTasksResponseDTO {
