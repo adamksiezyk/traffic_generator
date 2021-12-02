@@ -83,25 +83,25 @@ class LoginActivity : Activity() {
     private fun checkLoginValidity(): Int {
         val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
         val validityPassword = passwordEdit.text.isNotEmpty()
-        val validityDeviceName = deviceNameEdit.text.isNotEmpty()
-        val validityIpAddress = true //ipAddressEdit.text.trim().matches(ipRegex) - uncomment if ip will be used
-
-        if (!validityUsername) usernameEdit.error = "Unsupported characters!"
-        if (!validityPassword) passwordEdit.error = "Password cannot be empty!"
-        if (!validityIpAddress) ipAddressEdit.error = "Bad IP address!"
-
-        return if (validityUsername and validityPassword and validityDeviceName and validityIpAddress) RESULT_OK else RESULT_CANCELED
-    }
-
-    private fun checkRegisterValidity(): Int {
-        val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
-        val validityPassword = passwordEdit.text.isNotEmpty()
-        val validityIpAddress = true //ipAddressEdit.text.trim().matches(ipRegex) - uncomment if ip will be used
+        val validityIpAddress = ipAddressEdit.text.trim().matches(ipRegex)
 
         if (!validityUsername) usernameEdit.error = "Unsupported characters!"
         if (!validityPassword) passwordEdit.error = "Password cannot be empty!"
         if (!validityIpAddress) ipAddressEdit.error = "Bad IP address!"
 
         return if (validityUsername and validityPassword and validityIpAddress) RESULT_OK else RESULT_CANCELED
+    }
+
+    private fun checkRegisterValidity(): Int {
+        val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
+        val validityPassword = passwordEdit.text.isNotEmpty()
+        val validityDeviceName = deviceNameEdit.text.isNotEmpty()
+        val validityIpAddress = ipAddressEdit.text.trim().matches(ipRegex)
+
+        if (!validityUsername) usernameEdit.error = "Unsupported characters!"
+        if (!validityPassword) passwordEdit.error = "Password cannot be empty!"
+        if (!validityIpAddress) ipAddressEdit.error = "Bad IP address!"
+
+        return if (validityUsername and validityPassword and validityDeviceName and validityIpAddress) RESULT_OK else RESULT_CANCELED
     }
 }
