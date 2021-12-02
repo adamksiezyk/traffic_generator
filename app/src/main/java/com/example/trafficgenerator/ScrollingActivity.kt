@@ -2,37 +2,39 @@ package com.example.trafficgenerator
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import android.widget.TextView
-
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.concurrent.Executors
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Build
+import android.os.Bundle
 import android.text.SpannableString
+import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import com.example.trafficgenerator.dto.GetTasksResponseDTO
-import com.example.trafficgenerator.scripts.AsyncTaskExecutor
 import com.example.trafficgenerator.databinding.ActivityScrollingBinding
+import com.example.trafficgenerator.dto.GetTasksResponseDTO
+import com.example.trafficgenerator.dto.LoginResponseDTO
+import com.example.trafficgenerator.scripts.AsyncTaskExecutor
+import com.example.trafficgenerator.serverapi.ServerApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.Executors
 
 class ScrollingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityScrollingBinding
     private lateinit var logTextView: TextView
     private lateinit var asyncTaskExecutor: AsyncTaskExecutor
+    private lateinit var serverApi: ServerApi
+
     @ObsoleteCoroutinesApi
     private val asyncNetworkScope = CoroutineScope(newSingleThreadContext("name"))
-    //private val serverApi: ServerApi = ServerApi(applicationContext)
-    private var loggedIn : Boolean = false
+    private var loggedIn: Boolean = false
 
     @SuppressLint("SimpleDateFormat")
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
@@ -90,22 +92,30 @@ class ScrollingActivity : AppCompatActivity() {
                     if (data != null) {
                         val username = (data.extras?.get("username") as SpannableString).toString()
                         val password = (data.extras?.get("password") as SpannableString).toString()
-                        //val data.extras?.get("ipAddress") as String
+                        val ipAddress = (data.extras?.get("ipAddress") as SpannableString).toString()
+                        serverApi = ServerApi(applicationContext, ipAddress)
 
                         if (data.extras?.get("login") as Boolean) {
                             //If the requested operation is login
 
-                            val uuid = data.extras?.get("uuid")
+                            val uuid = data.extras?.get("uuid") as String
                             appendStringToLog("Login form data:")
                             appendStringToLog("\nUsername:\t$username\nPassword:\t$password")
 
                             asyncNetworkScope.launch {
                                 Thread.sleep(1500)
                                 appendStringToLog("login as $username with pw $password and uuid $uuid")
-//                                val response = serverApi.login(username, password, uuid)
-//                               if (response.component1() is LoginResponseDTO) {
-//                                    onSuccessfulLogin()
-//                                }
+                                val response = serverApi.login(username, password, uuid)
+                                if (response.component1() is LoginResponseDTO) {
+                                    onSuccessfulLogin()
+                                    getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
+                                        this.putString("username", username)
+                                        this.putString("password", password)
+                                        this.putString("ipAddress", ipAddress)
+                                        this.putString("token", response.component1()!!.token)
+                                        commit()
+                                    }
+                                }
                             }
 
                         } else {
@@ -117,15 +127,19 @@ class ScrollingActivity : AppCompatActivity() {
                             asyncNetworkScope.launch {
                                 Thread.sleep(4000)
                                 appendStringToLog("register as $username with pw $password name $deviceName")
-//                                val response = serverApi.register(username, password, deviceName)
-//                                if (response.component1() is LoginResponseDTO) {
-//                                    onSuccessfulLogin()
-//                                    getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
-//                                        this.putString("uuid", response.component1().uuid)
-//                                        this.putString("token", response.component1().token)
-//                                        commit()
-//                                    }
-//                                }
+                                val response = serverApi.register(username, password, deviceName)
+                                if (response.component1() is LoginResponseDTO) {
+                                    onSuccessfulLogin()
+                                    getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
+                                        this.putString("username", username)
+                                        this.putString("password", password)
+                                        this.putString("deviceName", deviceName)
+                                        this.putString("ipAddress", ipAddress)
+                                        this.putString("uuid", response.component1()!!.uuid)
+                                        this.putString("token", response.component1()!!.token)
+                                        commit()
+                                    }
+                                }
                             }
                         }
 
