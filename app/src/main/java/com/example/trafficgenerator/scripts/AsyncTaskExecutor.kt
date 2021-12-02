@@ -23,12 +23,15 @@ class AsyncTaskExecutor(private val executor: Executor) {
         "sample" to ::sampleTaskHandler,
         "ftp" to ::ftpTaskHandler,
         "http" to ::httpTaskHandler,
-        "video" to ::streamingTaskHandler
+        "audio" to ::streamingTaskHandler
     )
 
     // Executor takes care of putting the task in an execution queue, even if a task is already running
     @RequiresApi(Build.VERSION_CODES.N)
-    fun addTaskToExecutionQueue(task: GetTasksResponseDTO, callback: (GetTasksResponseDTO) -> (Unit)) {
+    fun addTaskToExecutionQueue(
+        task: GetTasksResponseDTO,
+        callback: (GetTasksResponseDTO) -> (Unit)
+    ) {
         executor.execute {
             val response = taskFunctionMap.getOrDefault(task.taskType) { task ->
                 throw NoSuchMethodException(task.taskType)
@@ -62,12 +65,13 @@ class AsyncTaskExecutor(private val executor: Executor) {
         * Output: a String array containing (<HOST>, <PATH>/<TO>/FILE>, <FILE>.<FILE_EXTENSION>)
         * */
 
-        val host        : String
-        val remoteDir   : String
-        val remoteFile  : String
+        val host: String
+        val remoteDir: String
+        val remoteFile: String
 
         // Get rid of `ftp://` suffix and split the remaining elements separated by single slashes to a mutable string
-        val temporaryList: MutableList<String> = fileURL.split("//")[1].split("/") as MutableList<String>
+        val temporaryList: MutableList<String> =
+            fileURL.split("//")[1].split("/") as MutableList<String>
 
         host = temporaryList.removeFirst()
 
@@ -87,9 +91,9 @@ class AsyncTaskExecutor(private val executor: Executor) {
             // Expecting fileURL to be of format - ftp://<HOST>/<PATH>/<TO>/<FILE>.<FILE_EXTENSION>
             val parsedFileURL: List<String> = parseFileURL(task.fileUrl)
 
-            val host      = parsedFileURL[0]
+            val host = parsedFileURL[0]
             val remoteDir = parsedFileURL[1]
-            val fileName  = parsedFileURL[2]
+            val fileName = parsedFileURL[2]
 
             val ftp = FtpClient(host = host, remoteCwd = remoteDir)
             ftp.establishConnection()
@@ -121,6 +125,7 @@ class AsyncTaskExecutor(private val executor: Executor) {
     private fun httpTaskHandler(task: GetTasksResponseDTO): GetTasksResponseDTO {
         val startDate = timingDateFormat.format(Date())
         // --- HTTP --- //
+        Thread.sleep(6969) // <- insert your implementation here
         try {
             var http = httprequest(task.fileUrl)
 
@@ -145,11 +150,25 @@ class AsyncTaskExecutor(private val executor: Executor) {
 
     private fun streamingTaskHandler(task: GetTasksResponseDTO): GetTasksResponseDTO {
         val startDate = timingDateFormat.format(Date())
-        // insert your implementation here
-        return task.copy(
-            status = "fail",
-            orderStart = startDate,
-            orderEnd = timingDateFormat.format(Date())
-        )
+        // --- Streaming --- //
+        try {
+            var music = streaming(task.fileUrl)
+            music.playSound(task.context)
+
+            // Finished successfully - set status to `pass`
+            return task.copy(
+                status = "pass",
+                orderStart = startDate,
+                orderEnd = timingDateFormat.format(Date())
+            )
+
+        } catch (e: Exception) {
+            // If anything failed - set status to `fail`
+            return task.copy(
+                status = "fail",
+                orderStart = startDate,
+                orderEnd = timingDateFormat.format(Date())
+            )
+        }
     }
 }

@@ -144,10 +144,10 @@ class ScrollingActivity : AppCompatActivity() {
                         }
 
                         //TODO: Remove fake tasks
-                        newTaskReceived(GetTasksResponseDTO(0L, "ftp", "none", "ftp://10.0.2.2/home/fate/Downloads/color.zip", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
-                        newTaskReceived(GetTasksResponseDTO(0L, "http", "none", "https://jsonplaceholder.typicode.com/todos/1", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
-                        newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
-                        newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
+                        newTaskReceived(GetTasksResponseDTO(0L, "ftp", "none", "ftp://10.0.2.2/home/fate/Downloads/color.zip", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4"),this@ScrollingActivity))
+                        newTaskReceived(GetTasksResponseDTO(0L, "http", "none", "https://jsonplaceholder.typicode.com/todos/1", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4"),this@ScrollingActivity))
+                        newTaskReceived(GetTasksResponseDTO(0L, "audio", "none", "http://cdn.pixabay.com/audio/2021/11/25/audio_91b32e02f9.mp3", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4"),this@ScrollingActivity))
+                        newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4"),this@ScrollingActivity))
 
                         // TODO: Call this based on result from websocket
                         onSuccessfulLogin()

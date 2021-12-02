@@ -1,5 +1,6 @@
 package com.example.trafficgenerator.dto
 
+import android.content.Context
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
 
@@ -10,7 +11,8 @@ data class GetTasksResponseDTO(
     val fileUrl: String,
     val orderStart: String,
     val orderEnd: String,
-    val device: Device
+    val device: Device,
+    val context: Context
 ) {
     data class Device(
         val uuid: String,
