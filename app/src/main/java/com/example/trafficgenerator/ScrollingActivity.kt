@@ -52,7 +52,9 @@ class ScrollingActivity : AppCompatActivity() {
         Callback for the task executor to handle a finished task.
      */
     private fun taskFinished(task: GetTasksResponseDTO) {
-        // TODO: pass it to websocket
+        asyncNetworkScope.launch {
+            //serverApi.taskFinished(task)
+        }
         appendTaskToLog(task)
     }
 
