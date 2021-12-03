@@ -103,7 +103,6 @@ class ScrollingActivity : AppCompatActivity() {
                             appendStringToLog("\nUsername:\t$username\nPassword:\t$password")
 
                             asyncNetworkScope.launch {
-                                Thread.sleep(1500)
                                 appendStringToLog("login as $username with pw $password and uuid $uuid")
                                 val response = serverApi.login(username, password, uuid)
                                 if (response.component1() is LoginResponseDTO) {
@@ -125,7 +124,6 @@ class ScrollingActivity : AppCompatActivity() {
                             appendStringToLog("\nUsername:\t$username\nPassword:\t$password\nName:\t$deviceName")
 
                             asyncNetworkScope.launch {
-                                Thread.sleep(4000)
                                 appendStringToLog("register as $username with pw $password name $deviceName")
                                 val response = serverApi.register(username, password, deviceName)
                                 if (response.component1() is LoginResponseDTO) {
@@ -142,15 +140,6 @@ class ScrollingActivity : AppCompatActivity() {
                                 }
                             }
                         }
-
-                        //TODO: Remove fake tasks
-                        newTaskReceived(GetTasksResponseDTO(0L, "ftp", "none", "ftp://10.0.2.2/home/fate/Downloads/color.zip", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
-                        newTaskReceived(GetTasksResponseDTO(0L, "http", "none", "https://jsonplaceholder.typicode.com/todos/1", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
-                        newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
-                        newTaskReceived(GetTasksResponseDTO(0L, "sample", "none", "ftp://192.168.0.101", "started", "ended", GetTasksResponseDTO.Device("deadbeef", "Devi", "Pixel 4")))
-
-                        // TODO: Call this based on result from websocket
-                        onSuccessfulLogin()
                     }
                 }
             }
