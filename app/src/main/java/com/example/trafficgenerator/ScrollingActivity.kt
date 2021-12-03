@@ -19,10 +19,7 @@ import com.example.trafficgenerator.scripts.AsyncTaskExecutor
 import com.example.trafficgenerator.serverapi.ServerApi
 import com.github.kittinunf.result.failure
 import com.github.kittinunf.result.success
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
@@ -35,7 +32,9 @@ class ScrollingActivity : AppCompatActivity() {
     private lateinit var serverApi: ServerApi
 
     @ObsoleteCoroutinesApi
-    private val asyncNetworkScope = CoroutineScope(newSingleThreadContext("name"))
+    private val asyncNetworkScope = CoroutineScope(newSingleThreadContext("networkThread"))
+    @ObsoleteCoroutinesApi
+    private val taskListenerScope = CoroutineScope(newSingleThreadContext("taskListenerThread"))
     private var loggedIn: Boolean = false
 
     @SuppressLint("SimpleDateFormat")
@@ -116,6 +115,9 @@ class ScrollingActivity : AppCompatActivity() {
                                         this.putString("token", it.token)
                                         commit()
                                     }
+                                    taskListenerScope.launch {
+                                        //serverApi.listenForTasks(::newTaskReceived)
+                                    }
                                 }
                                 response.failure {
                                     appendStringToLog("Login failed: $it")
@@ -141,6 +143,9 @@ class ScrollingActivity : AppCompatActivity() {
                                         this.putString("uuid", it.uuid)
                                         this.putString("token", it.token)
                                         commit()
+                                    }
+                                    taskListenerScope.launch {
+                                        //serverApi.listenForTasks(::newTaskReceived)
                                     }
                                 }
                                 response.failure {
@@ -171,6 +176,7 @@ class ScrollingActivity : AppCompatActivity() {
 
     private fun logOut() {
         appendStringToLog("Logging out")
+        taskListenerScope.cancel("User was logged out")
         binding.fab.setOnClickListener {
             openLoginActivity()
         }
