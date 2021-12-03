@@ -17,6 +17,8 @@ import com.example.trafficgenerator.dto.GetTasksResponseDTO
 import com.example.trafficgenerator.dto.LoginResponseDTO
 import com.example.trafficgenerator.scripts.AsyncTaskExecutor
 import com.example.trafficgenerator.serverapi.ServerApi
+import com.github.kittinunf.result.failure
+import com.github.kittinunf.result.success
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
@@ -105,15 +107,18 @@ class ScrollingActivity : AppCompatActivity() {
                             asyncNetworkScope.launch {
                                 appendStringToLog("login as $username with pw $password and uuid $uuid")
                                 val response = serverApi.login(username, password, uuid)
-                                if (response.component1() is LoginResponseDTO) {
+                                response.success {
                                     onSuccessfulLogin()
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
                                         this.putString("ipAddress", ipAddress)
-                                        this.putString("token", response.component1()!!.token)
+                                        this.putString("token", it.token)
                                         commit()
                                     }
+                                }
+                                response.failure {
+                                    appendStringToLog("Login failed: $it")
                                 }
                             }
 
@@ -126,17 +131,20 @@ class ScrollingActivity : AppCompatActivity() {
                             asyncNetworkScope.launch {
                                 appendStringToLog("register as $username with pw $password name $deviceName")
                                 val response = serverApi.register(username, password, deviceName)
-                                if (response.component1() is LoginResponseDTO) {
+                                response.success {
                                     onSuccessfulLogin()
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
                                         this.putString("deviceName", deviceName)
                                         this.putString("ipAddress", ipAddress)
-                                        this.putString("uuid", response.component1()!!.uuid)
-                                        this.putString("token", response.component1()!!.token)
+                                        this.putString("uuid", it.uuid)
+                                        this.putString("token", it.token)
                                         commit()
                                     }
+                                }
+                                response.failure {
+                                    appendStringToLog("Registration failed: $it")
                                 }
                             }
                         }
