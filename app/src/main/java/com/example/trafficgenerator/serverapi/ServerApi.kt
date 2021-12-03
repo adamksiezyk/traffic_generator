@@ -76,7 +76,7 @@ class ServerApi(private val context: Context, ipAddress: String) {
             .awaitObjectResult(GetTasksResponseDTO.Deserializer())
     }
 
-//    suspend fun listenForTasks(callback: Callback) {
+//    suspend fun listenForTasks(callback: (GetTasksResponseDTO) -> (Unit)) {
 //        val task: GetTasksResponseDTO
 //    }
 }
