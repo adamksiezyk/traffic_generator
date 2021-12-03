@@ -51,4 +51,5 @@ dependencies {
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
     implementation 'com.github.kittinunf.fuel:fuel-coroutines:2.3.1'
     implementation 'com.google.code.gson:gson:2.8.9'
+    implementation files('../ftp4j-1.7.2/ftp4j-1.7.2.jar')
 }
