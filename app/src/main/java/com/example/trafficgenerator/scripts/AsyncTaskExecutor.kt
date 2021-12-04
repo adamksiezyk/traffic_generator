@@ -20,10 +20,10 @@ class AsyncTaskExecutor(private val executor: Executor) {
     private val timingDateFormat = SimpleDateFormat("yyyy/MM/dd_HH:mm:ss", Locale.US)
 
     private val taskFunctionMap = mapOf<String, (GetTasksResponseDTO) -> (GetTasksResponseDTO)>(
-        "sample" to ::sampleTaskHandler,
-        "ftp" to ::ftpTaskHandler,
-        "http" to ::httpTaskHandler,
-        "video" to ::streamingTaskHandler
+        "SAMPLE" to ::sampleTaskHandler,
+        "SFTP" to ::ftpTaskHandler,
+        "HTTP" to ::httpTaskHandler,
+        "STREAMING" to ::streamingTaskHandler
     )
 
     // Executor takes care of putting the task in an execution queue, even if a task is already running
