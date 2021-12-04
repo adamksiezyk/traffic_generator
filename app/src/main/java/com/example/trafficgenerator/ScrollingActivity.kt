@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.trafficgenerator.databinding.ActivityScrollingBinding
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
+import com.example.trafficgenerator.dto.TaskDTO
 import com.example.trafficgenerator.scripts.AsyncTaskExecutor
 import com.example.trafficgenerator.serverapi.ServerApi
 import com.github.kittinunf.result.failure
@@ -39,11 +40,25 @@ class ScrollingActivity : AppCompatActivity() {
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
 
     /*
-        Callback for the websocket when new task was received, which will add the task to the execution queue
+        Callback for the websocket when new task was received, which will get all tasks and filter the new one and add it to the execution queue
      */
     @RequiresApi(Build.VERSION_CODES.N)
-    private fun newTaskReceived(task: GetTasksResponseDTO) {
-        asyncTaskExecutor.addTaskToExecutionQueue(task, ::taskFinished)
+    private fun newTaskReceived(task: TaskDTO, uuid: String, token: String) {
+        asyncNetworkScope.launch {
+            val result = serverApi.getTasks(token, uuid)
+            result.success {
+                it.filter { it.id == task.id }
+                if (it.isEmpty()) {
+                    appendStringToLog("Failed to get task ${task.id} from all tasks")
+                } else {
+                    asyncTaskExecutor.addTaskToExecutionQueue(it.first(), ::taskFinished)
+                }
+            }
+            result.failure {
+                appendStringToLog("Failed to get tasks: $it")
+            }
+        }
+
     }
 
     /*
