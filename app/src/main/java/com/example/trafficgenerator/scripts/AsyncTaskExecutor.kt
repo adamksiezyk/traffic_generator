@@ -85,7 +85,7 @@ class AsyncTaskExecutor(private val executor: Executor) {
 
         try {
             // Expecting fileURL to be of format - ftp://<HOST>/<PATH>/<TO>/<FILE>.<FILE_EXTENSION>
-            val parsedFileURL: List<String> = parseFileURL(task.fileUrl)
+            val parsedFileURL: List<String> = parseFileURL(task.fileUrl!!)
 
             val host      = parsedFileURL[0]
             val remoteDir = parsedFileURL[1]
@@ -122,7 +122,7 @@ class AsyncTaskExecutor(private val executor: Executor) {
         val startDate = timingDateFormat.format(Date())
         // --- HTTP --- //
         try {
-            var http = httprequest(task.fileUrl)
+            var http = httprequest(task.fileUrl!!)
 
             http.httpRequest()
 

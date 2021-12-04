@@ -7,9 +7,9 @@ data class GetTasksResponseDTO(
     val id: Long,
     val taskType: String,
     val status: String,
-    val fileUrl: String,
+    val fileUrl: String?,
     val orderStart: String,
-    val orderEnd: String,
+    val orderEnd: String?,
     val device: Device
 ) {
     data class Device(
