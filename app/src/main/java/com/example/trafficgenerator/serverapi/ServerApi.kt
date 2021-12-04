@@ -1,10 +1,12 @@
 package com.example.trafficgenerator.serverapi
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import com.example.trafficgenerator.R
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
 import com.example.trafficgenerator.dto.LoginResponseDTO
+import com.example.trafficgenerator.dto.TaskDTO
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
@@ -13,12 +15,14 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
+import ua.naiksoftware.stomp.Stomp
+import ua.naiksoftware.stomp.dto.StompHeader
 
-class ServerApi(private val context: Context, ipAddress: String) {
+class ServerApi(private val context: Context, private val ipAddress: String) {
     private val logTag: String = context.getString(R.string.server_api_tag)
 
     init {
-        FuelManager.instance.basePath = ipAddress
+        FuelManager.instance.basePath = "http://$ipAddress"
     }
 
     private fun Request.addJsonBodyHeader(): Request =
@@ -76,7 +80,15 @@ class ServerApi(private val context: Context, ipAddress: String) {
             .awaitObjectResult(GetTasksResponseDTO.Deserializer())
     }
 
-//    suspend fun listenForTasks(callback: (GetTasksResponseDTO) -> (Unit)) {
-//        val task: GetTasksResponseDTO
-//    }
+    @SuppressLint("CheckResult")
+    fun listenForTasks(token: String, uuid: String, callback: (TaskDTO) -> (Unit)) {
+        val socket = Stomp.over(
+            Stomp.ConnectionProvider.OKHTTP,
+            "ws://$ipAddress${context.getString(R.string.device_web_socket)}"
+        )
+        socket.connect(listOf(StompHeader("Authorization", "Bearer $token")))
+        socket.topic("${context.getString(R.string.listen_for_tasks)}$uuid").subscribe { data ->
+            callback(TaskDTO.Deserializer().deserialize(data.payload))
+        }
+    }
 }

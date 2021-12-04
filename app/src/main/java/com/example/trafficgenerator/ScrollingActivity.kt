@@ -14,7 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.trafficgenerator.databinding.ActivityScrollingBinding
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
-import com.example.trafficgenerator.dto.LoginResponseDTO
 import com.example.trafficgenerator.scripts.AsyncTaskExecutor
 import com.example.trafficgenerator.serverapi.ServerApi
 import com.github.kittinunf.result.failure
@@ -110,15 +109,16 @@ class ScrollingActivity : AppCompatActivity() {
                                 val response = serverApi.login(username, password, uuid)
                                 response.success {
                                     onSuccessfulLogin()
+                                    val token = it.token
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
                                         this.putString("ipAddress", ipAddress)
-                                        this.putString("token", it.token)
+                                        this.putString("token", token)
                                         commit()
                                     }
                                     taskListenerScope.launch {
-                                        //serverApi.listenForTasks(::newTaskReceived)
+                                        //serverApi.listenForTasks(token, uuid, ::newTaskReceived)
                                     }
                                 }
                                 response.failure {
