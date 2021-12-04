@@ -11,7 +11,7 @@ import com.example.trafficgenerator.databinding.ActivityLoginBinding
 
 class LoginActivity : Activity() {
 
-    private val ipRegex = Regex("([0-9]{1,3}\\.){3}[0-9]{1,3}")
+    private val ipRegex = Regex("([0-9]{1,3}\\.){3}[0-9]{1,3}(:[0-9]{1,5})?")
     private lateinit var binding: ActivityLoginBinding
     private lateinit var usernameEdit: EditText
     private lateinit var passwordEdit: EditText
@@ -83,7 +83,7 @@ class LoginActivity : Activity() {
     private fun checkLoginValidity(): Int {
         val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
         val validityPassword = passwordEdit.text.isNotEmpty()
-        val validityIpAddress = true //ipAddressEdit.text.trim().matches(ipRegex)
+        val validityIpAddress = ipAddressEdit.text.trim().matches(ipRegex)
 
         if (!validityUsername) usernameEdit.error = "Unsupported characters!"
         if (!validityPassword) passwordEdit.error = "Password cannot be empty!"
@@ -96,7 +96,7 @@ class LoginActivity : Activity() {
         val validityUsername = usernameEdit.text.trim().matches(Regex("[a-zA-Z0-9]+"))
         val validityPassword = passwordEdit.text.isNotEmpty()
         val validityDeviceName = deviceNameEdit.text.isNotEmpty()
-        val validityIpAddress = true //ipAddressEdit.text.trim().matches(ipRegex)
+        val validityIpAddress = ipAddressEdit.text.trim().matches(ipRegex)
 
         if (!validityUsername) usernameEdit.error = "Unsupported characters!"
         if (!validityPassword) passwordEdit.error = "Password cannot be empty!"

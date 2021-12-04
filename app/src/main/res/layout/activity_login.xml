@@ -57,7 +57,6 @@
             android:hint="@string/hint_ip_address"
             android:inputType="textPersonName"
             android:minHeight="48dp"
-            android:text="http://"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName" />
