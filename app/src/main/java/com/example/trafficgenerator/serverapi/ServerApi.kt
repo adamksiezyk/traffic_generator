@@ -5,6 +5,8 @@ import android.util.Log
 import com.example.trafficgenerator.R
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
 import com.example.trafficgenerator.dto.LoginResponseDTO
+import com.example.trafficgenerator.dto.TaskDTO
+import com.example.trafficgenerator.scripts.log
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
@@ -13,12 +15,23 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
+import io.reactivex.disposables.Disposable
+import ua.naiksoftware.stomp.Stomp
+import ua.naiksoftware.stomp.StompClient
+import ua.naiksoftware.stomp.dto.StompHeader
 
-class ServerApi(private val context: Context, ipAddress: String) {
+class ServerApi(private val context: Context, private val ipAddress: String) {
+    private var listeningSocket: StompClient? = null
+    private var listenForTasksTopic: Disposable? = null
     private val logTag: String = context.getString(R.string.server_api_tag)
 
     init {
-        FuelManager.instance.basePath = ipAddress
+        FuelManager.instance.basePath = "http://$ipAddress"
+    }
+
+    fun close() {
+        stopListeningForTasks()
+        disconnectListeningSocket()
     }
 
     private fun Request.addJsonBodyHeader(): Request =
@@ -76,7 +89,37 @@ class ServerApi(private val context: Context, ipAddress: String) {
             .awaitObjectResult(GetTasksResponseDTO.Deserializer())
     }
 
-//    suspend fun listenForTasks(callback: (GetTasksResponseDTO) -> (Unit)) {
-//        val task: GetTasksResponseDTO
-//    }
+    private fun connectListeningSocket(token: String) {
+        if (listeningSocket == null) {
+            Log.i(logTag, "Creating listening socket")
+            listeningSocket = Stomp.over(
+                Stomp.ConnectionProvider.OKHTTP,
+                "ws://$ipAddress${context.getString(R.string.device_web_socket)}"
+            )
+        }
+        if (listeningSocket?.isConnected == false) {
+            Log.i(logTag, "Connecting listening socket")
+            listeningSocket?.connect(listOf(StompHeader("Authorization", "Bearer $token")))
+        }
+    }
+
+    private fun disconnectListeningSocket() {
+        Log.i(logTag, "Disconnecting listening socket")
+        listeningSocket?.disconnect()
+    }
+
+    fun listenForTasks(token: String, uuid: String, callback: (TaskDTO, String, String) -> (Unit)) {
+        connectListeningSocket(token)
+        Log.i(logTag, "Listening for tasks")
+        listenForTasksTopic =
+            listeningSocket?.topic("${context.getString(R.string.listen_for_tasks)}$uuid")?.subscribe { data ->
+                Log.i(logTag, "Received task")
+                callback(TaskDTO.Deserializer().deserialize(data.payload), uuid, token)
+            }
+    }
+
+    fun stopListeningForTasks() {
+        Log.i(logTag, "Stopping listening for tasks")
+        listenForTasksTopic?.dispose()
+    }
 }

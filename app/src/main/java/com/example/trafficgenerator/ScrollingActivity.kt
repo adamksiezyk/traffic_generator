@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.trafficgenerator.databinding.ActivityScrollingBinding
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
-import com.example.trafficgenerator.dto.LoginResponseDTO
+import com.example.trafficgenerator.dto.TaskDTO
 import com.example.trafficgenerator.scripts.AsyncTaskExecutor
 import com.example.trafficgenerator.serverapi.ServerApi
 import com.github.kittinunf.result.failure
@@ -34,18 +34,31 @@ class ScrollingActivity : AppCompatActivity() {
     @ObsoleteCoroutinesApi
     private val asyncNetworkScope = CoroutineScope(newSingleThreadContext("networkThread"))
     @ObsoleteCoroutinesApi
-    private val taskListenerScope = CoroutineScope(newSingleThreadContext("taskListenerThread"))
     private var loggedIn: Boolean = false
 
     @SuppressLint("SimpleDateFormat")
     private val dateFormat: SimpleDateFormat = SimpleDateFormat("HH:mm:ss")
 
     /*
-        Callback for the websocket when new task was received, which will add the task to the execution queue
+        Callback for the websocket when new task was received, which will get all tasks and filter the new one and add it to the execution queue
      */
     @RequiresApi(Build.VERSION_CODES.N)
-    private fun newTaskReceived(task: GetTasksResponseDTO) {
-        asyncTaskExecutor.addTaskToExecutionQueue(task, ::taskFinished)
+    private fun newTaskReceived(task: TaskDTO, uuid: String, token: String) {
+        asyncNetworkScope.launch {
+            val result = serverApi.getTasks(token, uuid)
+            result.success {
+                val tasks = it.filter { it.id == task.taskId }
+                if (tasks.isEmpty()) {
+                    appendStringToLog("Failed to get task ${task.taskId} from all tasks")
+                } else {
+                    asyncTaskExecutor.addTaskToExecutionQueue(tasks.first(), ::taskFinished)
+                }
+            }
+            result.failure {
+                appendStringToLog("Failed to get tasks: $it")
+            }
+        }
+
     }
 
     /*
@@ -110,16 +123,15 @@ class ScrollingActivity : AppCompatActivity() {
                                 val response = serverApi.login(username, password, uuid)
                                 response.success {
                                     onSuccessfulLogin()
+                                    val token = it.token
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
                                         this.putString("ipAddress", ipAddress)
-                                        this.putString("token", it.token)
+                                        this.putString("token", token)
                                         commit()
                                     }
-                                    taskListenerScope.launch {
-                                        //serverApi.listenForTasks(::newTaskReceived)
-                                    }
+                                    serverApi.listenForTasks(token, uuid, ::newTaskReceived)
                                 }
                                 response.failure {
                                     appendStringToLog("Login failed: $it")
@@ -137,18 +149,18 @@ class ScrollingActivity : AppCompatActivity() {
                                 val response = serverApi.register(username, password, deviceName)
                                 response.success {
                                     onSuccessfulLogin()
+                                    val uuid = it.uuid
+                                    val token = it.token
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
                                         this.putString("deviceName", deviceName)
                                         this.putString("ipAddress", ipAddress)
-                                        this.putString("uuid", it.uuid)
-                                        this.putString("token", it.token)
+                                        this.putString("uuid", uuid)
+                                        this.putString("token", token)
                                         commit()
                                     }
-                                    taskListenerScope.launch {
-                                        //serverApi.listenForTasks(::newTaskReceived)
-                                    }
+                                     serverApi.listenForTasks(token, uuid, ::newTaskReceived)
                                 }
                                 response.failure {
                                     appendStringToLog("Registration failed: $it")
@@ -178,7 +190,7 @@ class ScrollingActivity : AppCompatActivity() {
 
     private fun logOut() {
         appendStringToLog("Logging out")
-        taskListenerScope.cancel("User was logged out")
+        serverApi.close()
         binding.fab.setOnClickListener {
             openLoginActivity()
         }
