@@ -33,7 +33,6 @@ class ScrollingActivity : AppCompatActivity() {
     @ObsoleteCoroutinesApi
     private val asyncNetworkScope = CoroutineScope(newSingleThreadContext("networkThread"))
     @ObsoleteCoroutinesApi
-    private val taskListenerScope = CoroutineScope(newSingleThreadContext("taskListenerThread"))
     private var loggedIn: Boolean = false
 
     @SuppressLint("SimpleDateFormat")
@@ -117,9 +116,7 @@ class ScrollingActivity : AppCompatActivity() {
                                         this.putString("token", token)
                                         commit()
                                     }
-                                    taskListenerScope.launch {
-                                        //serverApi.listenForTasks(token, uuid, ::newTaskReceived)
-                                    }
+                                    //serverApi.listenForTasks(token, uuid, ::newTaskReceived)
                                 }
                                 response.failure {
                                     appendStringToLog("Login failed: $it")
@@ -146,9 +143,7 @@ class ScrollingActivity : AppCompatActivity() {
                                         this.putString("token", it.token)
                                         commit()
                                     }
-                                    taskListenerScope.launch {
-                                        //serverApi.listenForTasks(::newTaskReceived)
-                                    }
+                                     //serverApi.listenForTasks(::newTaskReceived)
                                 }
                                 response.failure {
                                     appendStringToLog("Registration failed: $it")
@@ -178,7 +173,6 @@ class ScrollingActivity : AppCompatActivity() {
 
     private fun logOut() {
         appendStringToLog("Logging out")
-        taskListenerScope.cancel("User was logged out")
         binding.fab.setOnClickListener {
             openLoginActivity()
         }
