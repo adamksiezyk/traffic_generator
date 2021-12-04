@@ -131,7 +131,7 @@ class ScrollingActivity : AppCompatActivity() {
                                         this.putString("token", token)
                                         commit()
                                     }
-                                    //serverApi.listenForTasks(token, uuid, ::newTaskReceived)
+                                    serverApi.listenForTasks(token, uuid, ::newTaskReceived)
                                 }
                                 response.failure {
                                     appendStringToLog("Login failed: $it")
@@ -149,16 +149,18 @@ class ScrollingActivity : AppCompatActivity() {
                                 val response = serverApi.register(username, password, deviceName)
                                 response.success {
                                     onSuccessfulLogin()
+                                    val uuid = it.uuid
+                                    val token = it.token
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
                                         this.putString("deviceName", deviceName)
                                         this.putString("ipAddress", ipAddress)
-                                        this.putString("uuid", it.uuid)
-                                        this.putString("token", it.token)
+                                        this.putString("uuid", uuid)
+                                        this.putString("token", token)
                                         commit()
                                     }
-                                     //serverApi.listenForTasks(::newTaskReceived)
+                                     serverApi.listenForTasks(token, uuid, ::newTaskReceived)
                                 }
                                 response.failure {
                                     appendStringToLog("Registration failed: $it")
@@ -188,6 +190,7 @@ class ScrollingActivity : AppCompatActivity() {
 
     private fun logOut() {
         appendStringToLog("Logging out")
+        serverApi.close()
         binding.fab.setOnClickListener {
             openLoginActivity()
         }
