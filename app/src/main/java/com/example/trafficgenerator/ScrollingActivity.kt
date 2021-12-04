@@ -47,11 +47,11 @@ class ScrollingActivity : AppCompatActivity() {
         asyncNetworkScope.launch {
             val result = serverApi.getTasks(token, uuid)
             result.success {
-                it.filter { it.id == task.id }
-                if (it.isEmpty()) {
-                    appendStringToLog("Failed to get task ${task.id} from all tasks")
+                val tasks = it.filter { it.id == task.taskId }
+                if (tasks.isEmpty()) {
+                    appendStringToLog("Failed to get task ${task.taskId} from all tasks")
                 } else {
-                    asyncTaskExecutor.addTaskToExecutionQueue(it.first(), ::taskFinished)
+                    asyncTaskExecutor.addTaskToExecutionQueue(tasks.first(), ::taskFinished)
                 }
             }
             result.failure {
