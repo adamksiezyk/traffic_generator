@@ -81,14 +81,14 @@ class ServerApi(private val context: Context, private val ipAddress: String) {
     }
 
     @SuppressLint("CheckResult")
-    fun listenForTasks(token: String, uuid: String, callback: (TaskDTO) -> (Unit)) {
+    fun listenForTasks(token: String, uuid: String, callback: (TaskDTO, String, String) -> (Unit)) {
         val socket = Stomp.over(
             Stomp.ConnectionProvider.OKHTTP,
             "ws://$ipAddress${context.getString(R.string.device_web_socket)}"
         )
         socket.connect(listOf(StompHeader("Authorization", "Bearer $token")))
         socket.topic("${context.getString(R.string.listen_for_tasks)}$uuid").subscribe { data ->
-            callback(TaskDTO.Deserializer().deserialize(data.payload))
+            callback(TaskDTO.Deserializer().deserialize(data.payload), uuid, token)
         }
     }
 }
