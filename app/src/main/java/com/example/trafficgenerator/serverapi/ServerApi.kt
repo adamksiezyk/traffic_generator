@@ -140,4 +140,8 @@ class ServerApi(private val context: Context, private val ipAddress: String) {
             .addUUIDHeader(uuid)
             .awaitObjectResult(GetTasksResponseDTO.Deserializer())
     }
+
+    fun sendKeepAlive() {
+        TODO("Implement sendKeepAlive")
+    }
 }

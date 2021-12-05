@@ -23,6 +23,7 @@ import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
+import kotlin.concurrent.fixedRateTimer
 
 class ScrollingActivity : AppCompatActivity() {
 
@@ -30,10 +31,10 @@ class ScrollingActivity : AppCompatActivity() {
     private lateinit var logTextView: TextView
     private lateinit var asyncTaskExecutor: AsyncTaskExecutor
     private lateinit var serverApi: ServerApi
+    private lateinit var keepAliveTimer: Timer
 
     @ObsoleteCoroutinesApi
     private val asyncNetworkScope = CoroutineScope(newSingleThreadContext("networkThread"))
-    @ObsoleteCoroutinesApi
     private var loggedIn: Boolean = false
 
     @SuppressLint("SimpleDateFormat")
@@ -189,6 +190,11 @@ class ScrollingActivity : AppCompatActivity() {
         binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext,R.color.aghGreen))
         binding.fab.setImageResource(R.drawable.ic_logged_in)
 
+        keepAliveTimer = fixedRateTimer("keepAlive", initialDelay = 1000*60*10, period = 1000*60*10) {
+            asyncNetworkScope.launch {
+                serverApi.sendKeepAlive()
+            }
+        }
         binding.fab.setOnClickListener {
             logOut()
         }
@@ -197,6 +203,7 @@ class ScrollingActivity : AppCompatActivity() {
 
     private fun logOut() {
         appendStringToLog("Logging out")
+        keepAliveTimer.cancel()
         serverApi.close()
         binding.fab.setOnClickListener {
             openLoginActivity()
