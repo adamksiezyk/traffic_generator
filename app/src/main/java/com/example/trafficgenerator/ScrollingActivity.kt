@@ -130,8 +130,8 @@ class ScrollingActivity : AppCompatActivity() {
                                 appendStringToLog("login as $username with pw $password and uuid $uuid")
                                 val response = serverApi.login(username, password, uuid)
                                 response.success {
-                                    onSuccessfulLogin()
                                     val token = it.token
+                                    onSuccessfulLogin(token, uuid)
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
@@ -156,9 +156,9 @@ class ScrollingActivity : AppCompatActivity() {
                                 appendStringToLog("register as $username with pw $password name $deviceName")
                                 val response = serverApi.register(username, password, deviceName)
                                 response.success {
-                                    onSuccessfulLogin()
                                     val uuid = it.uuid
                                     val token = it.token
+                                    onSuccessfulLogin(token, uuid)
                                     getSharedPreferences("tgr_prefs", Context.MODE_PRIVATE).edit {
                                         this.putString("username", username)
                                         this.putString("password", password)
@@ -186,13 +186,13 @@ class ScrollingActivity : AppCompatActivity() {
         startActivityForResult(myIntent, 5225)
     }
 
-    private fun onSuccessfulLogin() {
+    private fun onSuccessfulLogin(token: String, uuid: String) {
         binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext,R.color.aghGreen))
         binding.fab.setImageResource(R.drawable.ic_logged_in)
 
-        keepAliveTimer = fixedRateTimer("keepAlive", initialDelay = 1000*60*10, period = 1000*60*10) {
+        keepAliveTimer = fixedRateTimer("keepAlive", initialDelay = 1000*60*9, period = 1000*60*9) {
             asyncNetworkScope.launch {
-                serverApi.sendKeepAlive()
+                serverApi.sendKeepAlive(token, uuid)
             }
         }
         binding.fab.setOnClickListener {

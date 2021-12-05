@@ -2,7 +2,7 @@
 <resources>
     <string name="register">/auth/device/login</string>
     <string name="login">/auth/device/login</string>
-    <string name="hello">/device/active</string>
+    <string name="active">/device/active</string>
     <string name="disconnect">/device/disconnect</string>
     <string name="get_tasks">/device/tasks</string>
     <string name="upload_task_result">/device/tasks/%d/upload</string>

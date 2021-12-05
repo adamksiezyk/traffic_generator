@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.trafficgenerator.R
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
+import com.example.trafficgenerator.dto.KeepAliveResponseDTO
 import com.example.trafficgenerator.dto.LoginResponseDTO
 import com.example.trafficgenerator.dto.TaskDTO
 import com.github.kittinunf.fuel.core.BlobDataPart
@@ -141,7 +142,12 @@ class ServerApi(private val context: Context, private val ipAddress: String) {
             .awaitObjectResult(GetTasksResponseDTO.Deserializer())
     }
 
-    fun sendKeepAlive() {
-        TODO("Implement sendKeepAlive")
+    suspend fun sendKeepAlive(token: String, uuid: String): Result<KeepAliveResponseDTO, FuelError> {
+        val keepAliveURL = context.getString(R.string.active)
+        return keepAliveURL
+            .httpPost()
+            .addAuthorizationHeader(token)
+            .addUUIDHeader(uuid)
+            .awaitObjectResult(KeepAliveResponseDTO.Deserializer())
     }
 }
