@@ -6,13 +6,14 @@ import com.example.trafficgenerator.R
 import com.example.trafficgenerator.dto.GetTasksResponseDTO
 import com.example.trafficgenerator.dto.LoginResponseDTO
 import com.example.trafficgenerator.dto.TaskDTO
-import com.example.trafficgenerator.scripts.log
+import com.github.kittinunf.fuel.core.BlobDataPart
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.coroutines.awaitObjectResult
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.fuel.httpUpload
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import io.reactivex.disposables.Disposable
@@ -86,7 +87,7 @@ class ServerApi(private val context: Context, private val ipAddress: String) {
             .addJsonBodyHeader()
             .addAuthorizationHeader(token)
             .addUUIDHeader(uuid)
-            .awaitObjectResult(GetTasksResponseDTO.Deserializer())
+            .awaitObjectResult(GetTasksResponseDTO.ArrayDeserializer())
     }
 
     private fun connectListeningSocket(token: String) {
@@ -112,7 +113,7 @@ class ServerApi(private val context: Context, private val ipAddress: String) {
         connectListeningSocket(token)
         Log.i(logTag, "Listening for tasks")
         listenForTasksTopic =
-            listeningSocket?.topic("${context.getString(R.string.listen_for_tasks)}$uuid")?.subscribe { data ->
+            listeningSocket?.topic(context.getString(R.string.listen_for_tasks).format(uuid))?.subscribe { data ->
                 Log.i(logTag, "Received task")
                 callback(TaskDTO.Deserializer().deserialize(data.payload), uuid, token)
             }
@@ -121,5 +122,22 @@ class ServerApi(private val context: Context, private val ipAddress: String) {
     fun stopListeningForTasks() {
         Log.i(logTag, "Stopping listening for tasks")
         listenForTasksTopic?.dispose()
+    }
+
+    suspend fun uploadTaskResult(
+        token: String,
+        uuid: String,
+        task: GetTasksResponseDTO
+    ): Result<GetTasksResponseDTO, FuelError> {
+        Log.i(logTag, "Uploading task result to server")
+        val uploadTaskResultURL = context.getString(R.string.upload_task_result).format(task.id)
+        val fileStream = GetTasksResponseDTO.Serializer().serialize(task).byteInputStream()
+
+        return uploadTaskResultURL
+            .httpUpload()
+            .add(BlobDataPart(fileStream, name = "file", filename = "task_${task.id}_result.json"))
+            .addAuthorizationHeader(token)
+            .addUUIDHeader(uuid)
+            .awaitObjectResult(GetTasksResponseDTO.Deserializer())
     }
 }

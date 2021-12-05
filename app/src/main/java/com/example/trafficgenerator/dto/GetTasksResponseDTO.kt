@@ -18,8 +18,18 @@ data class GetTasksResponseDTO(
         val deviceModel: String
     )
 
-    class Deserializer : ResponseDeserializable<Array<GetTasksResponseDTO>> {
+    class ArrayDeserializer : ResponseDeserializable<Array<GetTasksResponseDTO>> {
         override fun deserialize(content: String): Array<GetTasksResponseDTO> =
             Gson().fromJson(content, Array<GetTasksResponseDTO>::class.java)
+    }
+
+    class Deserializer : ResponseDeserializable<GetTasksResponseDTO> {
+        override fun deserialize(content: String): GetTasksResponseDTO =
+            Gson().fromJson(content, GetTasksResponseDTO::class.java)
+    }
+
+    class Serializer {
+        fun serialize(content: GetTasksResponseDTO): String =
+            Gson().toJson(content, GetTasksResponseDTO::class.java)
     }
 }

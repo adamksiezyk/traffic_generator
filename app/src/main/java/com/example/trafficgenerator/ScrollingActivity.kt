@@ -51,7 +51,7 @@ class ScrollingActivity : AppCompatActivity() {
                 if (tasks.isEmpty()) {
                     appendStringToLog("Failed to get task ${task.taskId} from all tasks")
                 } else {
-                    asyncTaskExecutor.addTaskToExecutionQueue(tasks.first(), ::taskFinished)
+                    asyncTaskExecutor.addTaskToExecutionQueue(tasks.first(), uuid, token, ::taskFinished)
                 }
             }
             result.failure {
@@ -64,11 +64,18 @@ class ScrollingActivity : AppCompatActivity() {
     /*
         Callback for the task executor to handle a finished task.
      */
-    private fun taskFinished(task: GetTasksResponseDTO) {
-        asyncNetworkScope.launch {
-            //serverApi.taskFinished(task)
-        }
+    private fun taskFinished(task: GetTasksResponseDTO, uuid: String, token: String) {
         appendTaskToLog(task)
+
+        asyncNetworkScope.launch {
+            val response = serverApi.uploadTaskResult(token, uuid, task)
+            response.success {
+                appendStringToLog("Uploading task ${task.id} result succeeded")
+            }
+            response.failure {
+                appendStringToLog("Uploading task ${task.id} result failed")
+            }
+        }
     }
 
     private fun appendTaskToLog(taskResult: GetTasksResponseDTO) {
