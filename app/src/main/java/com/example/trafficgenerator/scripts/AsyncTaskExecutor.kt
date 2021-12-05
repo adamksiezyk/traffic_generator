@@ -28,12 +28,16 @@ class AsyncTaskExecutor(private val executor: Executor) {
 
     // Executor takes care of putting the task in an execution queue, even if a task is already running
     @RequiresApi(Build.VERSION_CODES.N)
-    fun addTaskToExecutionQueue(task: GetTasksResponseDTO, callback: (GetTasksResponseDTO) -> (Unit)) {
+    fun addTaskToExecutionQueue(
+        task: GetTasksResponseDTO,
+        uuid: String, token: String,
+        callback: (GetTasksResponseDTO, String, String) -> (Unit)
+    ) {
         executor.execute {
             val response = taskFunctionMap.getOrDefault(task.taskType) { task ->
                 throw NoSuchMethodException(task.taskType)
             }.invoke(task)
-            callback(response)
+            callback(response, uuid, token)
         }
     }
 

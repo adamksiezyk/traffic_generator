@@ -5,6 +5,7 @@
     <string name="hello">/device/active</string>
     <string name="disconnect">/device/disconnect</string>
     <string name="get_tasks">/device/tasks</string>
+    <string name="upload_task_result">/device/tasks/%d/upload</string>
     <string name="device_web_socket">/devicews</string>
-    <string name="listen_for_tasks">/topic/device_</string>
+    <string name="listen_for_tasks">/topic/device_%s</string>
 </resources>
