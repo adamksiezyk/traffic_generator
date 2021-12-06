@@ -1,4 +1,17 @@
-# Test processing cycle
+# Android traffic generator
+
+## Introduction
+
+The traffic generator acting as a mobile user equipment is an android
+application capable of connecting to a central load testing server and
+performing requested tests.
+It listens for incoming tasks and executes them asynchronously.
+Resulting time measurments are aggreagted and uploaded to the server.
+
+The core of the application is written in Kotlin.
+
+
+# Android traffic generator functionality
 
 ## Visualization
 
@@ -30,7 +43,7 @@ required request every 10 minutes and is cancelled upon logout.
  - `trafficgenerator.logOut`
 
 
-## Retrieveing tasks
+## Retrieving tasks
 
 After receiveing JWT client subsribes to a websocket that broadcasts
 notifications about new tasks being issued.
@@ -46,7 +59,7 @@ Subscribing to `/topic/device_${uuid}` url gives following message upon event:
 }
 ```
 
-## Retrieveing tasks
+## Retrieving tasks
 
 Upon receiveing notification with `"taskId"` and `"taskType"` UE sends GET
 request to `/device/tasks` (`serverApi.getTasks`) in order to retrieve given
@@ -54,7 +67,7 @@ tasks details. Look `trafficgenerator.newTaskReceived`.
 
 Server responds with an array of all the tasks for a given device.
 
-### /device/tasks reponse
+### /device/tasks response
 
 ```json
 [
@@ -62,9 +75,10 @@ Server responds with an array of all the tasks for a given device.
 		"id": "long",
 		"taskType": "string",
 		"status": "string",
+		...
 ```
 
-## Retrieveing tasks
+## Retrieving tasks
 
 UE filters out all entries except for one with id received through websocket
 notification.
@@ -96,11 +110,11 @@ executed.
 ```kt
 class httprequest(private val url: String){...}
 class FtpClient(
-		private val host     : String,
-		private val port     : Int,
-		private val userName : String,
-		private val password : String,
-		private val remoteCwd: String
+	private val host     : String,
+	private val port     : Int,
+	private val userName : String,
+	private val password : String,
+	private val remoteCwd: String
 )
 private fun streamingTaskHandler(
 	task: GetTasksResponseDTO)
@@ -113,15 +127,15 @@ Server provides endpoint `/device/tasks/${taskId}/upload` for uploading
 arbitrarily formatted files. It is used by application agent for uploading task
 results in a JSON file.
 
-After task completion Android UE collects statistics in a file named
-`"task_${task.id}_result.json"` and sends it over to the server.
+After task completion Android UE stores task duration and status in a file
+named `"task_${task.id}_result.json"` and sends it over to the server.
 
 ## Uploading results
 
 Results file is created by a JSON serializer -
 `GetTasksResponseDTO.Serializer()`
 
-### data structure / class
+### serialized data structure / class
 
 ```kt
 data class GetTasksResponseDTO(
@@ -137,38 +151,25 @@ data class GetTasksResponseDTO(
 }
 ```
 
-# TBD
-
-### message
-
- - client info
- - availability
-
-## Server response
-
-### message
-
- - script
-
-## Processing
-
- - allocate threads
- - execute tasks
- - receive test results
-   + time benchmarks
-   + booleans (pass/fail)
-
-## Issueing response to the server
-
-### message
-
- - test results
-   + pass/fail
-   + execution times
 
 ## Disconnecting
 
-### message
+Device is automatically logged out from the server after 10min of inactivity.
 
- - client info
- - disconnect info
+On the applications end `keepAliveTimer` is cancelled, connection handler
+closed and access token removed.
+
+```kt
+private fun logOut() {
+	keepAliveTimer.cancel()
+	serverApi.close()
+	...
+	this.remove("token")
+}
+```
+
+Login button is enabled so the connection might be reestablished:
+
+```kt
+binding.fab.setOnClickListener{ openLoginActivity() }
+```
