@@ -177,11 +177,11 @@ binding.fab.setOnClickListener{ openLoginActivity() }
 # Android App Simulation
 
 ## First Screen
-![App opening screen](App_first_image.png)
+![App opening screen](fig/App_first_image.png)
 
 ## Login Screen
-![App Loging in screen](app_photo_2.png)
+![App Loging in screen](fig/app_photo_2.png)
 
 ## Screen with Logs
-![App screen with logs](app_photo_3.png)
+![App screen with logs](fig/app_photo_3.png)
 
