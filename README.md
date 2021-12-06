@@ -15,7 +15,7 @@ The core of the application is written in Kotlin.
 
 ## Visualization
 
-![Process cycle diagram](tr-notes.png)
+![Process cycle diagram](fig/tr-notes.png)
 
 ## Connection - authorization
 
