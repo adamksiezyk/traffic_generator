@@ -173,3 +173,15 @@ Login button is enabled so the connection might be reestablished:
 ```kt
 binding.fab.setOnClickListener{ openLoginActivity() }
 ```
+
+# Android App Simulation
+
+##First Screen
+![App opening screen](App_first_image.png)
+
+##Login Screen
+![App Loging in screen](app_photo_2.png)
+
+##Screen with Logs
+![App screen with logs](app_photo_3.png)
+
